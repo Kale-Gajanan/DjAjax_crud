@@ -1,0 +1,85 @@
+<!-- item_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item List</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.7/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.7/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <h1>Item List</h1>
+    <table id="item-table" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be dynamically loaded here using AJAX -->
+        </tbody>
+        <button id="ajax-button">Get Data</button>
+
+    </table>
+
+    <script>
+        $(document).ready(function() {
+        $('#ajax-button').click(function() {
+            $.ajax({
+                url: '{% url "get_data" %}',
+                success: function(data) {
+                    $('#ajax-response').text(data.message);
+                }
+            });
+        });
+    });
+        $(document).ready(function() {
+            // Initialize DataTable
+            var dataTable = $('#item-table').DataTable({
+                'processing': true,
+                'serverSide': true,
+                'ajax': {
+                    'url': '/item_list_json/',
+                    'type': 'GET',
+                    'dataSrc': 'data',
+                },
+                'columns': [
+                    {'data': 'id'},
+                    {'data': 'name'},
+                    {'data': 'description'},
+                    {
+                        'data': null,
+                        'render': function(data, type, row) {
+                            return '<button onclick="editItem(' + row.id + ')">Edit</button> ' +
+                                   '<button onclick="deleteItem(' + row.id + ')">Delete</button>';
+                        }
+                    },
+                ]
+            });
+
+            // Reload the table data on page reload
+            dataTable.ajax.reload();
+
+            // Add event listener for table draw event to reload data after each draw
+            $('#item-table').on('draw.dt', function () {
+                dataTable.ajax.reload();
+            });
+        });
+
+        function editItem(item_id) {
+            // Implement your edit logic using Ajax
+            console.log('Edit Item:', item_id);
+        }
+
+        function deleteItem(item_id) {
+            // Implement your delete logic using Ajax
+            console.log('Delete Item:', item_id);
+        }
+    </script>
+</body>
+</html>

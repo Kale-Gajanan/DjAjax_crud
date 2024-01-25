@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Books DataTable</title>
+    <!-- Include DataTables CSS and JS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+</head>
+<body>
+
+<button id="addBook" class="btn btn-success mt-2">Add Book</button>
+<button id="toggleTable" class="btn btn-secondary mt-2">Toggle Table</button>
+
+
+<table id="booksTable" class="display">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Publication Date</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+</table>
+
+<button id="hideTable" class="btn btn-secondary mt-2">Hide Table</button>
+
+<script>
+    $(document).ready(function() {
+        // DataTable initialization
+        var booksTable = $('#booksTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '/get_books/',  // URL to the Django view handling the Ajax request
+                type: 'GET',
+                dataSrc: 'data',
+            },
+            columns: [
+                {data: 'title'},
+                {data: 'author'},
+                {data: 'publication_date'},
+                {
+                    data: null,
+                    render: function(data, type, row) {
+                        return '<button class="btn btn-primary edit-btn" data-id="' + row.id + '">Edit</button>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function(data, type, row) {
+                        return '<button class="btn btn-danger delete-btn" data-id="' + row.id + '">Delete</button>';
+                    }
+                }
+            ]
+        });
+
+         // Toggle Table button click event
+        $('#toggleTable').click(function() {
+            $('#booksTable').toggle();
+        });
+
+
+        // Hide Table button click event
+        $('#hideTable').click(function() {
+            var tableContainer = $('#booksTable').closest('.dataTables_wrapper');
+            tableContainer.toggle();
+        });
+
+        // Add Book button click event
+        $('#addBook').click(function() {
+            // Implement your logic to redirect to the "Add Book" page
+            window.location.href = '/books/new/';
+        });
+
+        // Edit button click event with confirmation dialog
+        $('#booksTable').on('click', '.edit-btn', function() {
+            var bookId = $(this).data('id');
+            // Show confirmation dialog
+            var confirmation = confirm('Are you sure you want to edit?');
+            if (confirmation) {
+                // If user clicks OK, redirect to edit URL
+                window.location.href = + bookId + '/edit/' ;
+            }
+        });
+
+        // Delete button click event with confirmation dialog
+        $('#booksTable').on('click', '.delete-btn', function() {
+            var bookId = $(this).data('id');
+            // Show confirmation dialog
+            var confirmation = confirm('Are you sure you want to delete?');
+            if (confirmation) {
+                 // If user clicks OK, redirect to edit URL
+                window.location.href = + bookId + '/delete/' ;
+                // If user clicks OK, implement your delete logic here
+                console.log('Delete button clicked for Book ID: ' + bookId);
+                // You can make an AJAX request or redirect to a delete URL
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
